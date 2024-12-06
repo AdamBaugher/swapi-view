@@ -17,6 +17,7 @@ const ResourcePage: React.FC = () => {
   const [loading, setLoading] = useState(true); // State for loading indicator
   const [error, setError] = useState<string | null>(null); // Error handling state
   const navigate = useNavigate(); // Use navigate to programmatically change routes
+  const resourceTypeOrDefault = resourceType || "people";
   
   // Fetch resource categories when the component mounts
   useEffect(() => {
@@ -36,7 +37,7 @@ const ResourcePage: React.FC = () => {
     (page: number, searchQuery: string) => {
       setLoading(true);
       setError(null); // Reset error before fetching
-      getResources(resourceType || "people", page, searchQuery)
+      getResources(resourceTypeOrDefault, page, searchQuery)
         .then((data) => {
           setResources(data.results); // Set fetched resources
           setTotalPages(Math.ceil(data.count / 10)); // Calculate total pages based on count
@@ -46,7 +47,7 @@ const ResourcePage: React.FC = () => {
         })
         .finally(() => setLoading(false)); // Turn off loading indicator
     },
-    [resourceType] // Re-run the effect when resourceType changes
+    [resourceTypeOrDefault] // Re-run the effect when resourceType changes
   );
 
   // Fetch resources whenever currentPage, resourceType, or searchQuery changes
@@ -97,7 +98,7 @@ const ResourcePage: React.FC = () => {
       )}
 
       {/* Resource Categories */}
-      <CategoryList categories={categories} handleCategoryClick={handleCategoryClick} selectedCategory={resourceType || "people"} />
+      <CategoryList categories={categories} handleCategoryClick={handleCategoryClick} selectedCategory={resourceTypeOrDefault} />
       
       {/* Search Input */}
       <input
@@ -120,7 +121,7 @@ const ResourcePage: React.FC = () => {
             {/* Display resource list and pagination */}
             <ResourceList
               resources={resources}
-              resourceType={resourceType || "people"}
+              resourceType={resourceTypeOrDefault}
             />
             <Pagination
               currentPage={currentPage}
