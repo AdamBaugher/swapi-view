@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import CategoryList from "../components/ui/CategoryList.tsx";
 import ResourceList from "../components/resource/ResourceList/index.tsx";
 import Pagination from "../components/common/Pagination.tsx";
+import Loading from "../components/common/Loading.tsx";
 import { getCategories, getResources } from "../utils/resource.ts";
 
 const ResourcePage: React.FC = () => {
@@ -13,13 +14,19 @@ const ResourcePage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1); // State to store the total number of pages
   const [searchQuery, setSearchQuery] = useState(""); // State for storing search query
   const [searchInput, setSearchInput] = useState(""); // State for the search input value
+  const [loading, setLoading] = useState(true); // State for loading indicator
+  const [error, setError] = useState<string | null>(null); // Error handling state
   const navigate = useNavigate(); // Use navigate to programmatically change routes
   
   // Fetch resource categories when the component mounts
   useEffect(() => {
     const fetchCategories = async () => {
+      setLoading(true);
+      setError(null); // Reset error before fetching
       getCategories()
         .then(data => setCategories(Object.keys(data))) // Set the categories from the response
+        .catch(err => setError("Failed to fetch categories. Please try again.")) // Handle errors
+        .finally(() => setLoading(false)); // Turn off loading indicator
     };
     fetchCategories(); // Call the fetchCategories function on mount
   }, []);
@@ -27,11 +34,17 @@ const ResourcePage: React.FC = () => {
   // Fetch resources based on the current page and search query
   const fetchResources = useCallback(
     (page: number, searchQuery: string) => {
+      setLoading(true);
+      setError(null); // Reset error before fetching
       getResources(resourceType || "people", page, searchQuery)
         .then((data) => {
           setResources(data.results); // Set fetched resources
           setTotalPages(Math.ceil(data.count / 10)); // Calculate total pages based on count
-        });
+        })
+        .catch(() => {
+          setError("Failed to fetch resources. Please try again."); // Handle errors
+        })
+        .finally(() => setLoading(false)); // Turn off loading indicator
     },
     [resourceType] // Re-run the effect when resourceType changes
   );
@@ -65,8 +78,24 @@ const ResourcePage: React.FC = () => {
     navigate(`/${category}`); // Navigate to the selected category
   }, [navigate]);
 
+  
+  // Show loading state while fetching data
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <div className="p-4">
+      {/* Error Alert */}
+      {error && (
+        <div
+          className="mb-4 p-4 text-red-800 bg-red-100 border border-red-200 rounded"
+          role="alert"
+        >
+          {error}
+        </div>
+      )}
+
       {/* Resource Categories */}
       <CategoryList categories={categories} handleCategoryClick={handleCategoryClick} selectedCategory={resourceType || "people"} />
       
@@ -81,12 +110,12 @@ const ResourcePage: React.FC = () => {
       />
 
       {/* Display message if no results are found */}
-      {resources.length === 0 ? (
+      {resources.length === 0 && !error ? (
         <div className="text-center text-xl text-gray-500 py-10">
           No results found
         </div>
       ) : (
-        (
+        !error && (
           <>
             {/* Display resource list and pagination */}
             <ResourceList
