@@ -114,3 +114,12 @@ export enum ResourcesType {
   Starships = 'starships',
   Vehicles = 'vehicles',
 }
+
+export const displayConfig: Record<string, string[]> = {
+  films: ["title", "director", "release_date", "opening_crawl", "url"],
+  people: ["name", "gender", "homeworld", "height", "mass", "url"],
+  planets: ["name", "climate", "population", "diameter", "gravity", "url"],
+  species: ["name", "classification", "language", "average_height", "average_lifespan", "language", "url"],
+  starships: ["name", "model", "manufacturer", "MGLT", "cargo_capacity", "passengers", "url"],
+  vehicles: ["name", "model", "manufacturer", "cost_in_credits", "length", "url"],
+};

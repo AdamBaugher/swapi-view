@@ -33,3 +33,8 @@ async function request(url: string) {
 export const getCategories = async () => {
   return await request(`${root}`);
 }
+
+// Function to get resources based on the type, page number, and search query
+export const getResources = async (resourcesType: string, page: number, searchQuery: string) => {
+  return await request(`${root}/${resourcesType}/?page=${page}${searchQuery ? `&search=${searchQuery}` : ''}`);
+}
